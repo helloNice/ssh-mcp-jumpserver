@@ -58,6 +58,24 @@ function parseArgs(argv: string[]): ServerOptions {
           i++;
         }
         break;
+      case '--jumpserver-url':
+        if (nextArg) {
+          options.jumpserverUrl = nextArg;
+          i++;
+        }
+        break;
+      case '--jumpserver-key-id':
+        if (nextArg) {
+          options.jumpserverKeyId = nextArg;
+          i++;
+        }
+        break;
+      case '--jumpserver-secret-id':
+        if (nextArg) {
+          options.jumpserverSecretId = nextArg;
+          i++;
+        }
+        break;
       case '--help':
       case '-h':
         printHelp();
@@ -69,15 +87,26 @@ function parseArgs(argv: string[]): ServerOptions {
     }
   }
 
+  // Fall back to environment variables
+  if (!options.jumpserverUrl && process.env.JUMPSERVER_URL) {
+    options.jumpserverUrl = process.env.JUMPSERVER_URL;
+  }
+  if (!options.jumpserverKeyId && process.env.JUMPSERVER_KEY_ID) {
+    options.jumpserverKeyId = process.env.JUMPSERVER_KEY_ID;
+  }
+  if (!options.jumpserverSecretId && process.env.JUMPSERVER_SECRET_ID) {
+    options.jumpserverSecretId = process.env.JUMPSERVER_SECRET_ID;
+  }
+
   return options;
 }
 
 function printHelp(): void {
   const help = `
-SSH MCP Server - Model Context Protocol server for SSH remote execution
+SSH MCP JumpServer - Model Context Protocol server for SSH remote execution via JumpServer
 
 Usage:
-  ssh-mcp-server [options]
+  ssh-mcp-jumpserver [options]
 
 Options:
   --project-root <path>     Project root directory (for project-level ssh.config)
@@ -88,7 +117,15 @@ Options:
   --max-output <chars>      Maximum output characters per stream (default: 10000)
   --max-connections <n>     Maximum concurrent SSH connections (default: 5)
   --idle-timeout <ms>       Connection idle timeout in ms (default: 600000)
+  --jumpserver-url <url>    JumpServer base URL (enables dynamic host discovery)
+  --jumpserver-key-id <id>  JumpServer Access Key ID
+  --jumpserver-secret-id <id> JumpServer Access Secret ID
   -h, --help                Show this help message
+
+Environment Variables:
+  JUMPSERVER_URL            JumpServer base URL (alternative to --jumpserver-url)
+  JUMPSERVER_KEY_ID         JumpServer Access Key ID (alternative to --jumpserver-key-id)
+  JUMPSERVER_SECRET_ID      JumpServer Access Secret ID (alternative to --jumpserver-secret-id)
 
 Configuration:
   Project config: <project-root>/ssh.config
@@ -98,7 +135,7 @@ Configuration:
 
 MCP Tools provided:
   ssh_list_hosts        List all available SSH hosts
-  ssh_exec              Execute a command on a remote SSH host
+  ssh_exec              Execute a command on a remote SSH host (with JumpServer fallback)
   ssh_init_config       Initialize SSH configuration file
   ssh_get_config        Get configuration for a specific host
   ssh_test_connection   Test SSH connectivity to a host
@@ -113,9 +150,10 @@ MCP Tools provided:
 async function main(): Promise<void> {
   const options = parseArgs(process.argv);
 
-  logger.info('Starting SSH MCP Server', {
+  logger.info('Starting SSH MCP JumpServer', {
     projectRoot: options.projectRoot || '(none)',
     strictHostKey: options.strictHostKey ?? false,
+    jumpserver: options.jumpserverUrl ? 'enabled' : 'disabled',
   });
 
   // Create MCP server

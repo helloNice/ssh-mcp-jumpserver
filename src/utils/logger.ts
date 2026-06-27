@@ -54,7 +54,7 @@ export class Logger {
       try {
         this.server.sendLoggingMessage({
           level,
-          logger: 'ssh-mcp-server',
+          logger: 'ssh-mcp-jumpserver',
           data: fullMessage,
         });
       } catch {

@@ -1,404 +1,117 @@
-# SSH MCP Server
-
-[![GitHub stars](https://img.shields.io/github/stars/B143KC47/ssh_mcp?style=flat-square)](https://github.com/B143KC47/ssh_mcp/stargazers)
-<<<<<<< HEAD
-=======
-[![CI](https://github.com/B143KC47/ssh_mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/B143KC47/ssh_mcp/actions/workflows/ci.yml)
->>>>>>> d719fe8 (chore: add community health and CI files)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![MCP](https://img.shields.io/badge/MCP-compatible-6e56cf?style=flat-square)](https://modelcontextprotocol.io/)
-[![SSH](https://img.shields.io/badge/SSH-security--first-0f766e?style=flat-square)](https://www.openssh.com/)
-
-[English](README.md) | **中文**
-
-一个面向 MCP 客户端的安全 SSH 服务器。`ssh_mcp` 让 Claude Desktop、VS Code Copilot、Augment 以及其他兼容 MCP 的智能体，可以通过一个带安全护栏的 SSH 代理执行远程命令，同时保留 OpenSSH 配置兼容性、连接池复用和输出截断能力。
-
-<<<<<<< HEAD
-## 为什么这个项目更容易被真正用起来
-
-- **延续你已有的 SSH 使用习惯**：支持标准 OpenSSH 字段，如 `Host`、`HostName`、`User`、`Port`、`IdentityFile`、`ProxyJump`
-- **比“裸奔式远程执行”更安全**：内置危险命令拦截、每主机白名单/黑名单、输出上限、敏感信息脱敏
-- **更适合多轮 AI 操作**：连接池减少重复握手，连续执行更顺滑
-- **适配主流 MCP 使用场景**：面向 Claude Desktop、VS Code Copilot、Augment 和其他兼容 MCP 的客户端
-- **适合团队协作**：项目级与用户级配置自动合并，共享主机和项目覆盖都能兼顾
-
-## 适用场景
-
-- AI 辅助的线上排障
-- 远程主机的观测、巡检、只读操作
-- DevOps / 平台工程智能助手
-- 需要 SSH 能力，但又不希望把无限制 Shell 权限直接交给智能体的内部工具
-
-## 快速开始
-
-=======
-## 项目健康度
-
-- [贡献指南](CONTRIBUTING.md)
-- [安全策略](SECURITY.md)
-- [行为准则](CODE_OF_CONDUCT.md)
-- [提交 Issue](https://github.com/B143KC47/ssh_mcp/issues)
-- [查看 CI 构建记录](https://github.com/B143KC47/ssh_mcp/actions/workflows/ci.yml)
-
-## 为什么这个项目更容易被真正用起来
-
-- **延续你已有的 SSH 使用习惯**：支持标准 OpenSSH 字段，如 `Host`、`HostName`、`User`、`Port`、`IdentityFile`、`ProxyJump`
-- **比“裸奔式远程执行”更安全**：内置危险命令拦截、每主机白名单/黑名单、输出上限、敏感信息脱敏
-- **更适合多轮 AI 操作**：连接池减少重复握手，连续执行更顺滑
-- **适配主流 MCP 使用场景**：面向 Claude Desktop、VS Code Copilot、Augment 和其他兼容 MCP 的客户端
-- **适合团队协作**：项目级与用户级配置自动合并，共享主机和项目覆盖都能兼顾
-
-## 适用场景
-
-- AI 辅助的线上排障
-- 远程主机的观测、巡检、只读操作
-- DevOps / 平台工程智能助手
-- 需要 SSH 能力，但又不希望把无限制 Shell 权限直接交给智能体的内部工具
-
-## 快速开始
-
->>>>>>> d719fe8 (chore: add community health and CI files)
-### 1. 安装并构建
-
-```bash
-npm install
-npm run build
-```
-
-### 2. 添加到你的 MCP 客户端
-
-仓库里已经附带可直接复制的示例配置：
-
-- `examples/mcp-config.claude.example.json`
-- `examples/mcp-config.vscode.example.json`
-
-Claude Desktop / Augment 最小示例：
-
-```json
-{
-  "mcpServers": {
-    "ssh": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/ssh-mcp-server/dist/index.js",
-        "--project-root",
-        "/path/to/your/project"
-      ],
-      "env": {}
-    }
-  }
-}
-```
-
-VS Code MCP 最小示例：
-
-```json
-{
-  "servers": {
-    "ssh": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/ssh-mcp-server/dist/index.js",
-        "--project-root",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
-```
-
-### 3. 配置 SSH 主机
-
-把 `examples/ssh.config.example` 复制成项目根目录下的 `ssh.config`，或者直接通过 MCP 工具初始化：
-
-```text
-Use tool: ssh_init_config with scope="project"
-```
-
-最小示例：
-
-```sshconfig
-Host my-server
-  HostName 192.168.1.100
-  User ubuntu
-  Port 22
-  IdentityFile ~/.ssh/id_rsa
-  # mcp-ssh:denylist = rm -rf,mkfs,dd,shutdown,reboot
-```
-
-### 4. 在 MCP 客户端里试试这些指令
-
-- “列出所有可用 SSH 主机。”
-- “测试 `my-server` 的 SSH 连接。”
-- “在 `my-server` 上执行 `uptime && df -h`。”
-- “显示 `my-server` 的合并后 SSH 配置。”
-
-## 核心能力
-
-- **双层配置系统**：项目级 (`ssh.config`) + 用户级 (`~/.config/mcp-ssh/config`) 自动合并
-- **连接池复用**：跨命令复用 SSH 连接，自动清理空闲连接
-- **每主机安全策略**：支持 allowlist、denylist、超时上限、输出上限
-- **输出管理**：自动截断，防止 LLM 上下文被大输出撑爆
-- **敏感信息保护**：私钥和敏感环境变量在输出中会被脱敏
-- **OpenSSH 兼容**：可以直接延续现有主机别名和 SSH 使用方式
-
-## 配置说明
-
-### 配置文件位置
-
-| 层级 | 路径 | 用途 |
-|------|------|------|
-| 项目级 | `<项目根目录>/ssh.config` | 当前项目专用主机 |
-| 用户级 | `~/.config/mcp-ssh/config` | 跨项目共享主机 |
-
-**合并规则**：项目级配置中同名 Host 的设置会覆盖用户级配置。
-
-### 安全注解
-
-在 `Host` 块里写注释即可声明策略：
-
-```sshconfig
-# mcp-ssh:denylist = cmd1,cmd2      # 黑名单：阻止这些命令模式
-# mcp-ssh:allowlist = cmd1,cmd2     # 白名单：仅允许这些命令模式
-# SSH MCP Server
+# SSH MCP JumpServer
 
 [![GitHub stars](https://img.shields.io/github/stars/B143KC47/ssh_mcp?style=flat-square)](https://github.com/B143KC47/ssh_mcp/stargazers)
 [![CI](https://github.com/B143KC47/ssh_mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/B143KC47/ssh_mcp/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-6e56cf?style=flat-square)](https://modelcontextprotocol.io/)
-[![SSH](https://img.shields.io/badge/SSH-security--first-0f766e?style=flat-square)](https://www.openssh.com/)
 
 [English](README.md) | **中文**
 
-一个面向 MCP 客户端的安全 SSH 服务器。`ssh_mcp` 让 Claude Desktop、VS Code Copilot、Augment 以及其他兼容 MCP 的智能体，可以通过一个带安全护栏的 SSH 代理执行远程命令，同时保留 OpenSSH 配置兼容性、连接池复用和输出截断能力。
+一个 MCP 服务器，让 AI 助手（Claude Desktop、VS Code Copilot 等）通过 SSH 连接到远程服务器——支持 **通过 JumpServer 动态发现主机**。不需要手动配置每一台机器，只要 JumpServer 知道它，就能连上。
 
-## 项目健康度
+## 为什么用这个项目
 
-- [贡献指南](CONTRIBUTING.md)
-- [安全策略](SECURITY.md)
-- [行为准则](CODE_OF_CONDUCT.md)
-- [提交 Issue](https://github.com/B143KC47/ssh_mcp/issues)
-- [查看 CI 构建记录](https://github.com/B143KC47/ssh_mcp/actions/workflows/ci.yml)
+- **JumpServer 动态发现**：连接任意 JumpServer 管理的主机——无需手动配 SSH 配置
+- **自动尝试用户名**：按 `root` → `ec2-user` → `game_server` 顺序尝试，直到连上
+- **兼容标准 SSH 配置**：静态主机仍然可以用你熟悉的 OpenSSH 配置文件
+- **安全默认值**：危险命令拦截、每主机白名单/黑名单、输出上限、敏感信息脱敏
+- **连接池复用**：跨 AI 交互步骤复用 SSH 连接，多轮操作更快
 
-## 为什么这个项目更容易被真正用起来
-
-- **延续你已有的 SSH 使用习惯**：支持标准 OpenSSH 字段，如 `Host`、`HostName`、`User`、`Port`、`IdentityFile`、`ProxyJump`
-- **比“裸奔式远程执行”更安全**：内置危险命令拦截、每主机白名单/黑名单、输出上限、敏感信息脱敏
-- **更适合多轮 AI 操作**：连接池减少重复握手，连续执行更顺滑
-- **适配主流 MCP 使用场景**：面向 Claude Desktop、VS Code Copilot、Augment 和其他兼容 MCP 的客户端
-- **适合团队协作**：项目级与用户级配置自动合并，共享主机和项目覆盖都能兼顾
-
-## 适用场景
-
-- AI 辅助的线上排障
-- 远程主机的观测、巡检、只读操作
-- DevOps / 平台工程智能助手
-- 需要 SSH 能力，但又不希望把无限制 Shell 权限直接交给智能体的内部工具
-
-## 快速开始
-
-### 1. 安装并构建
+## 安装
 
 ```bash
-npm install
-npm run build
+npm install -g ssh-mcp-jumpserver
+# 或: npm install && npm run build && npm link
 ```
 
-### 2. 添加到你的 MCP 客户端
-
-仓库里已经附带可直接复制的示例配置：
-
-- `examples/mcp-config.claude.example.json`
-- `examples/mcp-config.vscode.example.json`
-
-Claude Desktop / Augment 最小示例：
+## 添加到 MCP 客户端
 
 ```json
 {
   "mcpServers": {
     "ssh": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/ssh-mcp-server/dist/index.js",
-        "--project-root",
-        "/path/to/your/project"
-      ],
-      "env": {}
+      "command": "ssh-mcp-jumpserver",
+      "args": [],
+      "env": {
+        "JUMPSERVER_URL": "https://your-jumpserver.example.com",
+        "JUMPSERVER_KEY_ID": "your-access-key-id",
+        "JUMPSERVER_SECRET_ID": "your-access-secret-id"
+      }
     }
   }
 }
 ```
 
-VS Code MCP 最小示例：
+## 试试看
 
-```json
-{
-  "servers": {
-    "ssh": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/ssh-mcp-server/dist/index.js",
-        "--project-root",
-        "${workspaceFolder}"
-      ]
-    }
-  }
-}
+对你的 AI 助手说：
+
+> "帮我链接 **10.0.0.5** 执行 `uptime`。"
+>
+> "列出我所有的 SSH 主机。"
+>
+> "测试 **prod-db-01** 的连接。"
+
+不认识的服务器会自动通过 JumpServer 发现和连接。
+
+## 功能
+
+| 功能 | 说明 |
+|------|------|
+| 🔍 **JumpServer 动态发现** | 按 IP 或主机名搜索资产，通过 API 获取 SSH 密钥 |
+| 🔄 **用户名自动尝试** | 按 `root` → `ec2-user` → `game_server` 尝试 |
+| 📋 **静态 SSH 配置** | 支持标准 OpenSSH 配置文件 (`ssh.config`) |
+| 🔒 **安全策略** | 每主机白名单/黑名单、输出截断、敏感信息脱敏 |
+| 🔌 **连接池** | 复用 SSH 连接，自动清理空闲连接 |
+| 🌐 **HMAC-SHA256 认证** | HTTP Signature 签名请求访问 JumpServer API |
+
+## CLI 参数
+
+```
+ssh-mcp-jumpserver [选项]
+
+--jumpserver-url <地址>       JumpServer 地址（启用动态主机发现）
+--jumpserver-key-id <ID>      JumpServer Access Key ID
+--jumpserver-secret-id <ID>   JumpServer Access Secret ID
+--project-root <路径>         项目根目录（用于项目级 ssh.config）
+--timeout <毫秒>              默认命令超时（默认: 60000）
+--max-output <字符数>         最大输出字符数（默认: 10000）
+--max-connections <数量>      最大并发 SSH 连接（默认: 5）
+--idle-timeout <毫秒>         连接空闲超时（默认: 600000）
 ```
 
-### 3. 配置 SSH 主机
-
-把 `examples/ssh.config.example` 复制成项目根目录下的 `ssh.config`，或者直接通过 MCP 工具初始化：
-
-```text
-Use tool: ssh_init_config with scope="project"
-```
-
-最小示例：
-
-```sshconfig
-Host my-server
-  HostName 192.168.1.100
-  User ubuntu
-  Port 22
-  IdentityFile ~/.ssh/id_rsa
-  # mcp-ssh:denylist = rm -rf,mkfs,dd,shutdown,reboot
-```
-
-### 4. 在 MCP 客户端里试试这些指令
-
-- “列出所有可用 SSH 主机。”
-- “测试 `my-server` 的 SSH 连接。”
-- “在 `my-server` 上执行 `uptime && df -h`。”
-- “显示 `my-server` 的合并后 SSH 配置。”
-
-## 核心能力
-
-- **双层配置系统**：项目级 (`ssh.config`) + 用户级 (`~/.config/mcp-ssh/config`) 自动合并
-- **连接池复用**：跨命令复用 SSH 连接，自动清理空闲连接
-- **每主机安全策略**：支持 allowlist、denylist、超时上限、输出上限
-- **输出管理**：自动截断，防止 LLM 上下文被大输出撑爆
-- **敏感信息保护**：私钥和敏感环境变量在输出中会被脱敏
-- **OpenSSH 兼容**：可以直接延续现有主机别名和 SSH 使用方式
-
-## 配置说明
-
-### 配置文件位置
-
-| 层级 | 路径 | 用途 |
-|------|------|------|
-| 项目级 | `<项目根目录>/ssh.config` | 当前项目专用主机 |
-| 用户级 | `~/.config/mcp-ssh/config` | 跨项目共享主机 |
-
-**合并规则**：项目级配置中同名 Host 的设置会覆盖用户级配置。
-
-### 安全注解
-
-在 `Host` 块里写注释即可声明策略：
-
-```sshconfig
-# mcp-ssh:denylist = cmd1,cmd2      # 黑名单：阻止这些命令模式
-# mcp-ssh:allowlist = cmd1,cmd2     # 白名单：仅允许这些命令模式
-# mcp-ssh:maxTimeoutMs = 30000      # 该主机最大执行超时
-# mcp-ssh:maxOutputChars = 5000     # 该主机最大输出字符数
-```
-
-### 认证顺序
-
-1. **私钥认证**：来自 `IdentityFile`
-2. **SSH Agent**：通过 `SSH_AUTH_SOCK`（Unix）或 Pageant（Windows）
-3. **密码认证**：通过环境变量 `SSH_PASSWORD_<HOST>`
-
-示例：主机 `my-server` 的密码可设置为 `SSH_PASSWORD_MY_SERVER=secret`。
-
-## 为什么它比普通 SSH 包装器更值得用
-
-| 普通远程执行桥 | SSH MCP Server |
-|---|---|
-| 往往直接暴露完整 Shell | 支持每主机 allowlist / denylist |
-| 每一步都重新连接 | 复用连接池，减少重复握手 |
-| 大输出容易把模型上下文塞满 | 自动截断输出 |
-| 往往要重新定义主机配置 | 直接使用熟悉的 OpenSSH 语法 |
-| 日志里容易混入敏感数据 | 自动脱敏并隐藏敏感值 |
+也可以使用环境变量：`JUMPSERVER_URL`、`JUMPSERVER_KEY_ID`、`JUMPSERVER_SECRET_ID`。
 
 ## MCP 工具
 
-| 工具 | 描述 | 参数 |
-|------|------|------|
-| `ssh_list_hosts` | 列出所有可用 SSH 主机 | — |
-| `ssh_exec` | 在远程主机上执行命令 | `host`, `command`, `timeout_ms?` |
-| `ssh_init_config` | 初始化 SSH 配置文件 | `scope`, `project_root?`, `hosts?` |
-| `ssh_get_config` | 获取指定主机的配置 | `host` |
-| `ssh_test_connection` | 测试主机连接 | `host` |
-| `ssh_disconnect` | 断开指定主机或全部活动连接 | `host?` |
+| 工具 | 描述 |
+|------|------|
+| `ssh_list_hosts` | 列出所有已配置的 SSH 主机 |
+| `ssh_exec` | 在远程主机上执行命令（支持本地配置或 JumpServer） |
+| `ssh_get_config` | 显示指定主机的合并配置 |
+| `ssh_test_connection` | 测试 SSH 连通性 |
+| `ssh_disconnect` | 断开 SSH 会话 |
+| `ssh_init_config` | 初始化 SSH 配置文件 |
 
-## MCP 资源
+## JumpServer 解析流程
 
-| URI | 描述 |
-|-----|------|
-| `ssh://hosts` | 所有已配置 SSH 主机的 JSON 列表 |
-
-## 安全默认值
-
-- 默认阻止 `rm -rf /`、`mkfs`、`dd if=`、`shutdown`、`reboot` 等危险命令
-- 私钥内容和敏感环境变量会在输出中被脱敏
-- 命令在执行前会做基础清理
-- 并发连接数量和空闲连接寿命都有上限
-
-生产环境建议：
-
-1. 优先使用 `IdentityFile`，少用密码认证
-2. 生产主机优先使用 `# mcp-ssh:allowlist`
-3. 如果 `ssh.config` 包含敏感主机名，请加入 `.gitignore`
-4. 生产环境建议启用 `--strict-host-key`
-5. 尽量使用 SSH 证书或固定 `known_hosts`
-
-## CLI 选项
-
-```text
-ssh-mcp-server [选项]
-
---project-root <路径>       项目根目录（用于项目级 ssh.config）
---user-config <路径>        自定义用户配置路径（默认: ~/.config/mcp-ssh/config）
---strict-host-key           启用严格主机密钥校验
---no-strict-host-key        禁用严格主机密钥校验（默认）
---timeout <毫秒>            默认命令超时（默认: 60000）
---max-output <字符数>       每个流的最大输出字符数（默认: 10000）
---max-connections <数量>    最大并发 SSH 连接数（默认: 5）
---idle-timeout <毫秒>       连接空闲超时（默认: 600000）
 ```
-
-## 开发
-
-```bash
-# 安装依赖
-npm install
-
-# 开发模式运行
-npm run dev -- --project-root .
-
-# 构建
-npm run build
-
-# 运行构建后的版本
-npm start -- --project-root .
-
-# 使用 MCP Inspector 调试
-npm run inspect
+用户请求: ssh_exec host="10.0.0.5"
+  → "10.0.0.5" 在本地 ssh.config 中吗？
+    ├── 有 → 直接连接
+    └── 没有 → 查询 JumpServer API
+        ├── GET /api/v1/assets/assets/?ip=10.0.0.5
+        ├── GET /api/v1/assets/system-users/?asset=<id>
+        ├── GET /api/v1/assets/system-users/<id>/auth-info/
+        → 用发现的密钥构建 SSHHostConfig
+        → 尝试 root → ec2-user → game_server
+        → 执行命令
 ```
 
 ## 贡献
 
-欢迎提 Issue 和 PR。如果你希望支持更多 MCP 客户端、更严格的安全策略，或者更顺手的 SSH 工作流，直接提出来——好用的工具就是这样一点点磨出来的。
-
-具体贡献流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
-## 社区
-
-- 请遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-- 安全问题请优先参考 [SECURITY.md](SECURITY.md)，不要直接公开提漏洞 Issue
+见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 许可证
 

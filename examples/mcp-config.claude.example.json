@@ -1,13 +1,13 @@
 {
   "mcpServers": {
     "ssh": {
-      "command": "node",
-      "args": [
-        "/REPLACE_WITH_ABSOLUTE_PATH/ssh-mcp-server/dist/index.js",
-        "--project-root",
-        "/REPLACE_WITH_YOUR_PROJECT_PATH"
-      ],
-      "env": {}
+      "command": "ssh-mcp-jumpserver",
+      "args": [],
+      "env": {
+        "JUMPSERVER_URL": "https://your-jumpserver.example.com",
+        "JUMPSERVER_KEY_ID": "your-key-id",
+        "JUMPSERVER_SECRET_ID": "your-secret-id"
+      }
     }
   }
 }

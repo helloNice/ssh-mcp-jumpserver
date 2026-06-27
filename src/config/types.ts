@@ -12,6 +12,8 @@ export interface SSHHostConfig {
   port?: number;
   /** Path to private key file */
   identityFile?: string;
+  /** Raw private key content as Buffer (for dynamic key sources like JumpServer) */
+  privateKeyBuffer?: Buffer;
   /** ProxyJump host for connection hopping */
   proxyJump?: string;
   /** Strict host key checking mode */
@@ -116,4 +118,10 @@ export interface ServerOptions {
   maxConnections?: number;
   /** Connection idle timeout in ms (default: 600000 = 10min) */
   idleTimeoutMs?: number;
+  /** JumpServer base URL (enables dynamic host discovery) */
+  jumpserverUrl?: string;
+  /** JumpServer Access Key ID */
+  jumpserverKeyId?: string;
+  /** JumpServer Access Secret ID */
+  jumpserverSecretId?: string;
 }

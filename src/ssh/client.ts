@@ -262,8 +262,10 @@ export class SSHConnectionPool {
       config.keepaliveCountMax = hostConfig.serverAliveCountMax;
     }
 
-    // Authentication: try identity file first, then agent
-    if (hostConfig.identityFile) {
+    // Authentication: try privateKeyBuffer first (dynamic keys), then identity file, then agent
+    if (hostConfig.privateKeyBuffer) {
+      config.privateKey = hostConfig.privateKeyBuffer;
+    } else if (hostConfig.identityFile) {
       const keyPath = hostConfig.identityFile;
       if (existsSync(keyPath)) {
         try {
